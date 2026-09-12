@@ -1,0 +1,17 @@
+{
+  "name": "K-Lunsar Computer Training",
+  "short_name": "K-Lunsar",
+  "description": "Build Your Skills with practical computer and business digital training in Lunsar.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/k-lunsar-badge.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
