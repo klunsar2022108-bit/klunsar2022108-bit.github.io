@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { getDashboardPath, normalizeRole, pickPrimaryRole } from "@/lib/workflow";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 export const Route = createFileRoute("/reports")({
   beforeLoad: async () => {
@@ -139,159 +140,161 @@ function ReportsPage() {
   const approved = orders.filter((order) => order.payment_status === "approved").length;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-14">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Reports</p>
-          <h1 className="mt-2 text-4xl font-bold">Business, academic and operations analytics</h1>
-          <p className="mt-3 text-muted-foreground">
-            Live role-scoped data from approved transactions, programmes, students, inventory and
-            delivery.
-          </p>
+    <DashboardShell>
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 sm:px-8 sm:py-12">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">Reports</p>
+            <h1 className="mt-2 text-4xl font-bold">Business, academic and operations analytics</h1>
+            <p className="mt-3 text-muted-foreground">
+              Live role-scoped data from approved transactions, programmes, students, inventory and
+              delivery.
+            </p>
+          </div>
+          <Button onClick={exportCsv}>
+            <Download className="mr-2 h-4 w-4" />
+            Export sales CSV
+          </Button>
         </div>
-        <Button onClick={exportCsv}>
-          <Download className="mr-2 h-4 w-4" />
-          Export sales CSV
-        </Button>
+        <div className="grid gap-5 md:grid-cols-4">
+          <Metric label="Income" value={`Le ${Number(financial?.income ?? 0).toLocaleString()}`} />
+          <Metric
+            label="Expenditure"
+            value={
+              financial?.expenditure == null
+                ? "Restricted"
+                : `Le ${Number(financial.expenditure).toLocaleString()}`
+            }
+          />
+          <Metric
+            label="Profit"
+            value={
+              financial?.profit == null
+                ? "Restricted"
+                : `Le ${Number(financial.profit).toLocaleString()}`
+            }
+          />
+          <Metric label="Pending orders" value={String(pending)} />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ReportCard
+            title="Sales by period and channel"
+            icon={<BarChart3 className="h-5 w-5 text-primary" />}
+            empty={!sales.length}
+          >
+            {sales.slice(0, 20).map((row, index) => (
+              <Row
+                key={`${row.period}-${row.period_type}-${row.sales_channel}-${index}`}
+                label={String(row.period)}
+                detail={`${row.period_type} · ${String(row.sales_channel).replaceAll("_", " ")} · ${row.sale_count} sales`}
+                value={`Le ${Number(row.revenue).toLocaleString()}`}
+              />
+            ))}
+          </ReportCard>
+          <ReportCard
+            title="Products, services and programmes"
+            icon={<Package className="h-5 w-5 text-primary" />}
+            empty={!products.length}
+          >
+            {products.slice(0, 10).map((row) => (
+              <Row
+                key={`${row.item_type}-${row.name}`}
+                label={row.name}
+                detail={`${row.item_type} · ${row.units_sold} units`}
+                value={`Le ${Number(row.revenue).toLocaleString()}`}
+              />
+            ))}
+          </ReportCard>
+          <ReportCard
+            title="Expenses by category"
+            icon={<Receipt className="h-5 w-5 text-primary" />}
+            empty={!expenses.length}
+          >
+            {expenses.slice(0, 10).map((row, index) => (
+              <Row
+                key={`${row.category}-${row.period}-${index}`}
+                label={row.category}
+                detail={`${row.period} · ${row.expense_count} entries`}
+                value={`Le ${Number(row.expenditure).toLocaleString()}`}
+              />
+            ))}
+          </ReportCard>
+          <ReportCard
+            title="Outstanding balances"
+            icon={<Users className="h-5 w-5 text-primary" />}
+            empty={!balances.length}
+          >
+            {balances.slice(0, 10).map((row) => (
+              <Row
+                key={row.user_id}
+                label={row.user_id.slice(0, 8)}
+                detail={`${row.order_count} orders`}
+                value={`Le ${Number(row.balance_due).toLocaleString()}`}
+                danger
+              />
+            ))}
+          </ReportCard>
+          <ReportCard
+            title="Academic programme performance"
+            icon={<GraduationCap className="h-5 w-5 text-primary" />}
+            empty={!academic.length}
+          >
+            {academic.map((row) => (
+              <Row
+                key={row.programme}
+                label={row.programme}
+                detail={`${row.students} students · ${row.approved_registrations} approved`}
+                value={`${Number(row.average_progress).toFixed(0)}% progress`}
+              />
+            ))}
+          </ReportCard>
+          <ReportCard
+            title="Delivery operations"
+            icon={<Truck className="h-5 w-5 text-primary" />}
+            empty={!delivery.length}
+          >
+            {delivery.map((row) => (
+              <Row
+                key={row.status}
+                label={row.status.replaceAll("_", " ")}
+                detail="orders"
+                value={String(row.orders)}
+              />
+            ))}
+          </ReportCard>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ReportCard
+            title="Stock status"
+            icon={<Package className="h-5 w-5 text-primary" />}
+            empty={!stock.length}
+          >
+            {stock.slice(0, 12).map((row) => (
+              <Row
+                key={row.name}
+                label={row.name}
+                detail={row.is_low_stock ? "Low stock" : "In stock"}
+                value={String(row.stock_quantity ?? "unlimited")}
+                danger={row.is_low_stock}
+              />
+            ))}
+          </ReportCard>
+          <Card>
+            <CardHeader>
+              <h2 className="text-xl font-bold">Operational totals</h2>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-3">
+              <Metric label="Approved payments" value={String(approved)} />
+              <Metric label="Pending orders" value={String(pending)} />
+              <Metric
+                label="Low-stock items"
+                value={String(stock.filter((item) => item.is_low_stock).length)}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      <div className="grid gap-5 md:grid-cols-4">
-        <Metric label="Income" value={`Le ${Number(financial?.income ?? 0).toLocaleString()}`} />
-        <Metric
-          label="Expenditure"
-          value={
-            financial?.expenditure == null
-              ? "Restricted"
-              : `Le ${Number(financial.expenditure).toLocaleString()}`
-          }
-        />
-        <Metric
-          label="Profit"
-          value={
-            financial?.profit == null
-              ? "Restricted"
-              : `Le ${Number(financial.profit).toLocaleString()}`
-          }
-        />
-        <Metric label="Pending orders" value={String(pending)} />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ReportCard
-          title="Sales by period and channel"
-          icon={<BarChart3 className="h-5 w-5 text-primary" />}
-          empty={!sales.length}
-        >
-          {sales.slice(0, 20).map((row, index) => (
-            <Row
-              key={`${row.period}-${row.period_type}-${row.sales_channel}-${index}`}
-              label={String(row.period)}
-              detail={`${row.period_type} · ${String(row.sales_channel).replaceAll("_", " ")} · ${row.sale_count} sales`}
-              value={`Le ${Number(row.revenue).toLocaleString()}`}
-            />
-          ))}
-        </ReportCard>
-        <ReportCard
-          title="Products, services and programmes"
-          icon={<Package className="h-5 w-5 text-primary" />}
-          empty={!products.length}
-        >
-          {products.slice(0, 10).map((row) => (
-            <Row
-              key={`${row.item_type}-${row.name}`}
-              label={row.name}
-              detail={`${row.item_type} · ${row.units_sold} units`}
-              value={`Le ${Number(row.revenue).toLocaleString()}`}
-            />
-          ))}
-        </ReportCard>
-        <ReportCard
-          title="Expenses by category"
-          icon={<Receipt className="h-5 w-5 text-primary" />}
-          empty={!expenses.length}
-        >
-          {expenses.slice(0, 10).map((row, index) => (
-            <Row
-              key={`${row.category}-${row.period}-${index}`}
-              label={row.category}
-              detail={`${row.period} · ${row.expense_count} entries`}
-              value={`Le ${Number(row.expenditure).toLocaleString()}`}
-            />
-          ))}
-        </ReportCard>
-        <ReportCard
-          title="Outstanding balances"
-          icon={<Users className="h-5 w-5 text-primary" />}
-          empty={!balances.length}
-        >
-          {balances.slice(0, 10).map((row) => (
-            <Row
-              key={row.user_id}
-              label={row.user_id.slice(0, 8)}
-              detail={`${row.order_count} orders`}
-              value={`Le ${Number(row.balance_due).toLocaleString()}`}
-              danger
-            />
-          ))}
-        </ReportCard>
-        <ReportCard
-          title="Academic programme performance"
-          icon={<GraduationCap className="h-5 w-5 text-primary" />}
-          empty={!academic.length}
-        >
-          {academic.map((row) => (
-            <Row
-              key={row.programme}
-              label={row.programme}
-              detail={`${row.students} students · ${row.approved_registrations} approved`}
-              value={`${Number(row.average_progress).toFixed(0)}% progress`}
-            />
-          ))}
-        </ReportCard>
-        <ReportCard
-          title="Delivery operations"
-          icon={<Truck className="h-5 w-5 text-primary" />}
-          empty={!delivery.length}
-        >
-          {delivery.map((row) => (
-            <Row
-              key={row.status}
-              label={row.status.replaceAll("_", " ")}
-              detail="orders"
-              value={String(row.orders)}
-            />
-          ))}
-        </ReportCard>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ReportCard
-          title="Stock status"
-          icon={<Package className="h-5 w-5 text-primary" />}
-          empty={!stock.length}
-        >
-          {stock.slice(0, 12).map((row) => (
-            <Row
-              key={row.name}
-              label={row.name}
-              detail={row.is_low_stock ? "Low stock" : "In stock"}
-              value={String(row.stock_quantity ?? "unlimited")}
-              danger={row.is_low_stock}
-            />
-          ))}
-        </ReportCard>
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-bold">Operational totals</h2>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-3">
-            <Metric label="Approved payments" value={String(approved)} />
-            <Metric label="Pending orders" value={String(pending)} />
-            <Metric
-              label="Low-stock items"
-              value={String(stock.filter((item) => item.is_low_stock).length)}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </DashboardShell>
   );
 }
 

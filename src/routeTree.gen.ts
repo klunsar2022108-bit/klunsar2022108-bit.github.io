@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AcademicPeriodsRouteImport } from './routes/academic-periods'
 import { Route as AcademicRegistrationRouteImport } from './routes/academic-registration'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
@@ -23,8 +24,10 @@ import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as CustomerRouteImport } from './routes/customer'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FacilitiesRouteImport } from './routes/facilities'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as OperationsRouteImport } from './routes/operations'
+import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as RolesRouteImport } from './routes/roles'
@@ -35,6 +38,7 @@ import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as VerifyCertificateRouteImport } from './routes/verify-certificate'
+import { Route as WorkQueueRouteImport } from './routes/work-queue'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders/$orderId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +64,11 @@ const AcademicRegistrationRoute = AcademicRegistrationRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApprovalsRoute = ApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssetsRoute = AssetsRouteImport.update({
@@ -107,6 +116,11 @@ const FacilitiesRoute = FacilitiesRouteImport.update({
   path: '/facilities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GalleryRoute = GalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
@@ -115,6 +129,11 @@ const GalleryRoute = GalleryRouteImport.update({
 const OperationsRoute = OperationsRouteImport.update({
   id: '/operations',
   path: '/operations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcurementRoute = ProcurementRouteImport.update({
+  id: '/procurement',
+  path: '/procurement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -167,6 +186,11 @@ const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
   path: '/verify-certificate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkQueueRoute = WorkQueueRouteImport.update({
+  id: '/work-queue',
+  path: '/work-queue',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -179,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/academic-periods': typeof AcademicPeriodsRoute
   '/academic-registration': typeof AcademicRegistrationRoute
   '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
   '/assets': typeof AssetsRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
@@ -188,8 +213,10 @@ export interface FileRoutesByFullPath {
   '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
   '/facilities': typeof FacilitiesRoute
+  '/feedback': typeof FeedbackRoute
   '/gallery': typeof GalleryRoute
   '/operations': typeof OperationsRoute
+  '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
   '/reviews': typeof ReviewsRoute
   '/roles': typeof RolesRoute
@@ -200,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/teacher': typeof TeacherRoute
   '/verify-certificate': typeof VerifyCertificateRoute
+  '/work-queue': typeof WorkQueueRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
 }
 export interface FileRoutesByTo {
@@ -208,6 +236,7 @@ export interface FileRoutesByTo {
   '/academic-periods': typeof AcademicPeriodsRoute
   '/academic-registration': typeof AcademicRegistrationRoute
   '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
   '/assets': typeof AssetsRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
@@ -217,8 +246,10 @@ export interface FileRoutesByTo {
   '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
   '/facilities': typeof FacilitiesRoute
+  '/feedback': typeof FeedbackRoute
   '/gallery': typeof GalleryRoute
   '/operations': typeof OperationsRoute
+  '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
   '/reviews': typeof ReviewsRoute
   '/roles': typeof RolesRoute
@@ -229,6 +260,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/teacher': typeof TeacherRoute
   '/verify-certificate': typeof VerifyCertificateRoute
+  '/work-queue': typeof WorkQueueRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
 }
 export interface FileRoutesById {
@@ -238,6 +270,7 @@ export interface FileRoutesById {
   '/academic-periods': typeof AcademicPeriodsRoute
   '/academic-registration': typeof AcademicRegistrationRoute
   '/admin': typeof AdminRoute
+  '/approvals': typeof ApprovalsRoute
   '/assets': typeof AssetsRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
@@ -247,8 +280,10 @@ export interface FileRoutesById {
   '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
   '/facilities': typeof FacilitiesRoute
+  '/feedback': typeof FeedbackRoute
   '/gallery': typeof GalleryRoute
   '/operations': typeof OperationsRoute
+  '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
   '/reviews': typeof ReviewsRoute
   '/roles': typeof RolesRoute
@@ -259,6 +294,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/teacher': typeof TeacherRoute
   '/verify-certificate': typeof VerifyCertificateRoute
+  '/work-queue': typeof WorkQueueRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
 }
 export interface FileRouteTypes {
@@ -269,6 +305,7 @@ export interface FileRouteTypes {
     | '/academic-periods'
     | '/academic-registration'
     | '/admin'
+    | '/approvals'
     | '/assets'
     | '/auth'
     | '/cart'
@@ -278,8 +315,10 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/facilities'
+    | '/feedback'
     | '/gallery'
     | '/operations'
+    | '/procurement'
     | '/reports'
     | '/reviews'
     | '/roles'
@@ -290,6 +329,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/teacher'
     | '/verify-certificate'
+    | '/work-queue'
     | '/orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -298,6 +338,7 @@ export interface FileRouteTypes {
     | '/academic-periods'
     | '/academic-registration'
     | '/admin'
+    | '/approvals'
     | '/assets'
     | '/auth'
     | '/cart'
@@ -307,8 +348,10 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/facilities'
+    | '/feedback'
     | '/gallery'
     | '/operations'
+    | '/procurement'
     | '/reports'
     | '/reviews'
     | '/roles'
@@ -319,6 +362,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/teacher'
     | '/verify-certificate'
+    | '/work-queue'
     | '/orders/$orderId'
   id:
     | '__root__'
@@ -327,6 +371,7 @@ export interface FileRouteTypes {
     | '/academic-periods'
     | '/academic-registration'
     | '/admin'
+    | '/approvals'
     | '/assets'
     | '/auth'
     | '/cart'
@@ -336,8 +381,10 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/facilities'
+    | '/feedback'
     | '/gallery'
     | '/operations'
+    | '/procurement'
     | '/reports'
     | '/reviews'
     | '/roles'
@@ -348,6 +395,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/teacher'
     | '/verify-certificate'
+    | '/work-queue'
     | '/orders/$orderId'
   fileRoutesById: FileRoutesById
 }
@@ -357,6 +405,7 @@ export interface RootRouteChildren {
   AcademicPeriodsRoute: typeof AcademicPeriodsRoute
   AcademicRegistrationRoute: typeof AcademicRegistrationRoute
   AdminRoute: typeof AdminRoute
+  ApprovalsRoute: typeof ApprovalsRoute
   AssetsRoute: typeof AssetsRoute
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
@@ -366,8 +415,10 @@ export interface RootRouteChildren {
   CustomerRoute: typeof CustomerRoute
   DashboardRoute: typeof DashboardRoute
   FacilitiesRoute: typeof FacilitiesRoute
+  FeedbackRoute: typeof FeedbackRoute
   GalleryRoute: typeof GalleryRoute
   OperationsRoute: typeof OperationsRoute
+  ProcurementRoute: typeof ProcurementRoute
   ReportsRoute: typeof ReportsRoute
   ReviewsRoute: typeof ReviewsRoute
   RolesRoute: typeof RolesRoute
@@ -378,6 +429,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TeacherRoute: typeof TeacherRoute
   VerifyCertificateRoute: typeof VerifyCertificateRoute
+  WorkQueueRoute: typeof WorkQueueRoute
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
 }
 
@@ -416,6 +468,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/approvals': {
+      id: '/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof ApprovalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assets': {
@@ -481,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FacilitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gallery': {
       id: '/gallery'
       path: '/gallery'
@@ -493,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: '/operations'
       fullPath: '/operations'
       preLoaderRoute: typeof OperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/procurement': {
+      id: '/procurement'
+      path: '/procurement'
+      fullPath: '/procurement'
+      preLoaderRoute: typeof ProcurementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -565,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyCertificateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/work-queue': {
+      id: '/work-queue'
+      path: '/work-queue'
+      fullPath: '/work-queue'
+      preLoaderRoute: typeof WorkQueueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders/$orderId': {
       id: '/orders/$orderId'
       path: '/orders/$orderId'
@@ -581,6 +661,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcademicPeriodsRoute: AcademicPeriodsRoute,
   AcademicRegistrationRoute: AcademicRegistrationRoute,
   AdminRoute: AdminRoute,
+  ApprovalsRoute: ApprovalsRoute,
   AssetsRoute: AssetsRoute,
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
@@ -590,8 +671,10 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerRoute: CustomerRoute,
   DashboardRoute: DashboardRoute,
   FacilitiesRoute: FacilitiesRoute,
+  FeedbackRoute: FeedbackRoute,
   GalleryRoute: GalleryRoute,
   OperationsRoute: OperationsRoute,
+  ProcurementRoute: ProcurementRoute,
   ReportsRoute: ReportsRoute,
   ReviewsRoute: ReviewsRoute,
   RolesRoute: RolesRoute,
@@ -602,6 +685,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TeacherRoute: TeacherRoute,
   VerifyCertificateRoute: VerifyCertificateRoute,
+  WorkQueueRoute: WorkQueueRoute,
   OrdersOrderIdRoute: OrdersOrderIdRoute,
 }
 export const routeTree = rootRouteImport

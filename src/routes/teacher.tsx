@@ -1,7 +1,19 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { DashboardPage } from "@/routes/dashboard";
+import { lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getDashboardPath, normalizeRole, pickPrimaryRole } from "@/lib/workflow";
+
+const DashboardPage = lazy(() =>
+  import("./dashboard").then(({ DashboardPage }) => ({ default: DashboardPage })),
+);
+
+function TeacherDashboard() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-14">Loading dashboard...</div>}>
+      <DashboardPage />
+    </Suspense>
+  );
+}
 
 export const Route = createFileRoute("/teacher")({
   beforeLoad: async () => {
@@ -28,5 +40,5 @@ export const Route = createFileRoute("/teacher")({
   head: () => ({
     meta: [{ title: "Teacher Dashboard | K-Lunsar Computer Training" }],
   }),
-  component: DashboardPage,
+  component: TeacherDashboard,
 });

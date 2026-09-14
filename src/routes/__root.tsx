@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   redirect,
@@ -169,6 +170,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const location = useLocation();
+  const isDashboardRoute = [
+    "/dashboard",
+    "/student",
+    "/teacher",
+    "/customer",
+    "/admin",
+    "/super-admin",
+  ].includes(location.pathname);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
@@ -184,12 +194,12 @@ function RootComponent() {
       <AuthProvider>
         <CartProvider>
           <div className="flex min-h-screen flex-col">
-            <Header />
+            {!isDashboardRoute && <Header />}
             <main className="flex-1">
               {/* Required: nested routes render here. */}
               <Outlet />
             </main>
-            <Footer />
+            {!isDashboardRoute && <Footer />}
           </div>
           <Toaster richColors position="top-center" />
         </CartProvider>

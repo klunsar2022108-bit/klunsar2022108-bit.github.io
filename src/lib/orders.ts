@@ -21,6 +21,7 @@ export async function createOrderFromCart({
   paymentReference,
   amountPaid,
   selectedProductIds,
+  idempotencyKey,
 }: {
   lines: CartLine[];
   userId: string;
@@ -33,6 +34,7 @@ export async function createOrderFromCart({
   paymentReference?: string;
   amountPaid: number;
   selectedProductIds?: string[];
+  idempotencyKey?: string;
 }) {
   if (!lines.length) {
     throw new Error("Your cart is empty.");
@@ -71,6 +73,16 @@ export async function createOrderFromCart({
     ? new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
     : null;
 
+  if (idempotencyKey) {
+    const { data: existingOrder } = await supabase
+      .from("orders")
+      .select("id, total")
+      .eq("user_id", userId)
+      .eq("idempotency_key", idempotencyKey)
+      .maybeSingle();
+    if (existingOrder) return existingOrder;
+  }
+
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
@@ -92,6 +104,7 @@ export async function createOrderFromCart({
       expected_delivery_at: expectedDeliveryAt,
       delivery_visible: false,
       sales_channel: "online",
+      idempotency_key: idempotencyKey ?? null,
     })
     .select("id")
     .single();

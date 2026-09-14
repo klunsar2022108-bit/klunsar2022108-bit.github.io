@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   CreditCard,
@@ -79,6 +79,54 @@ function CheckoutPage() {
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [amountPaid, setAmountPaid] = useState("");
   const [paymentReference, setPaymentReference] = useState("");
+  const submissionKeyRef = useRef<string>(crypto.randomUUID());
+  const submittingRef = useRef(false);
+  const draftKey = `klunsar-checkout-draft:${user?.id ?? "anonymous"}`;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id) return;
+    const raw = window.localStorage.getItem(draftKey);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as Partial<Record<string, string>>;
+      if (draft.customerName != null) setCustomerName(draft.customerName);
+      if (draft.customerPhone != null) setCustomerPhone(draft.customerPhone);
+      setDeliveryAddress(draft.deliveryAddress ?? "");
+      setNotes(draft.notes ?? "");
+      setPaymentMethod(draft.paymentMethod ?? "mobile-money");
+      setAmountPaid(draft.amountPaid ?? "");
+      setPaymentReference(draft.paymentReference ?? "");
+    } catch {
+      window.localStorage.removeItem(draftKey);
+    }
+  }, [draftKey, user?.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id || completed) return;
+    window.localStorage.setItem(
+      draftKey,
+      JSON.stringify({
+        customerName,
+        customerPhone,
+        deliveryAddress,
+        notes,
+        paymentMethod,
+        amountPaid,
+        paymentReference,
+      }),
+    );
+  }, [
+    amountPaid,
+    completed,
+    customerName,
+    customerPhone,
+    deliveryAddress,
+    draftKey,
+    notes,
+    paymentMethod,
+    paymentReference,
+    user?.id,
+  ]);
 
   const selectedMethod = PAYMENT_METHODS.find((m) => m.id === paymentMethod);
   const payableLines = selectedProductIds.length
@@ -189,6 +237,8 @@ function CheckoutPage() {
     }
 
     setSubmitting(true);
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     try {
       let proofPath: string | null = null;
       if (requiresProof && paymentProofFile && user) {
@@ -215,16 +265,19 @@ function CheckoutPage() {
         selectedProductIds: payableLines.map((line) => line.productId),
         status: "pending_approval" as const,
         paymentStatus: "awaiting_verification" as const,
+        idempotencyKey: submissionKeyRef.current,
       };
 
       await createOrderFromCart(orderData);
       clear();
+      window.localStorage.removeItem(draftKey);
       setCompleted(true);
       toast.success("Order submitted for approval. Check your email for updates.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "The order could not be saved.";
       toast.error(message);
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };

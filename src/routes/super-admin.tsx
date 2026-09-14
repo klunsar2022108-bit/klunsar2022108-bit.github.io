@@ -18,6 +18,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 export const Route = createFileRoute("/super-admin")({
   beforeLoad: async () => {
@@ -66,7 +67,7 @@ function SuperAdminPage() {
         .from("sales_period_analytics")
         .select("period, revenue, sale_count")
         .order("period", { ascending: false })
-        .limit(6);
+        .limit(24);
       if (error) throw new Error(error.message);
       return data ?? [];
     },
@@ -177,296 +178,314 @@ function SuperAdminPage() {
       icon: ShieldCheck,
     },
     { label: "Active users", value: String(users.length), icon: Users },
+    {
+      label: "Annual sales volume",
+      value: String(sales.reduce((sum, row) => sum + Number(row.sale_count ?? 0), 0)),
+      icon: BarChart3,
+    },
+    {
+      label: "Annual revenue tracked",
+      value: `Le ${sales.reduce((sum, row) => sum + Number(row.revenue ?? 0), 0).toLocaleString()}`,
+      icon: DollarSign,
+    },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-14">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Super Admin
-          </p>
-          <h1 className="mt-2 text-4xl font-bold">Business oversight dashboard</h1>
+    <DashboardShell>
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-12">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              Super Admin
+            </p>
+            <h1 className="mt-2 text-4xl font-bold">Business oversight dashboard</h1>
+          </div>
+          <div className="flex gap-2">
+            <Link to="/roles">
+              <Button variant="outline">Manage roles</Button>
+            </Link>
+            <Link to="/reports">
+              <Button variant="outline">View analytics</Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link to="/roles">
-            <Button variant="outline">Manage roles</Button>
-          </Link>
-          <Link to="/reports">
-            <Button variant="outline">View analytics</Button>
-          </Link>
-        </div>
-      </div>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-4">
-        {businessMetrics.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="border-border/70">
-            <CardContent className="flex items-center gap-3 py-5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <div>
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="font-display text-lg font-semibold">{value}</p>
+        <div className="mt-8 grid gap-5 md:grid-cols-4 xl:grid-cols-6">
+          {businessMetrics.map(({ label, value, icon: Icon }) => (
+            <Card key={label} className="border-border/70">
+              <CardContent className="flex items-center gap-3 py-5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="font-display text-lg font-semibold">{value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <Card className="border-border/70">
+            <CardHeader>
+              <h2 className="font-display text-2xl font-bold">Revenue trend</h2>
+            </CardHeader>
+            <CardContent className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="period" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardHeader>
+              <h2 className="font-display text-2xl font-bold">Operational priority</h2>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Pending orders</span>
+                  <Badge variant="secondary">{pendingOrders.length}</Badge>
+                </div>
+                <p className="mt-1">
+                  Review and approve business transactions and customer orders promptly.
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Low-stock items</span>
+                  <Badge variant="secondary">{lowStockProducts.length}</Badge>
+                </div>
+                <p className="mt-1">
+                  Replenish stock and maintain product availability across the sales catalogue.
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Approvals</span>
+                  <Badge variant="secondary">Live</Badge>
+                </div>
+                <p className="mt-1">
+                  Monitor account, payment, student, and delivery approvals in one place.
+                </p>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <Card className="border-border/70">
-          <CardHeader>
-            <h2 className="font-display text-2xl font-bold">Revenue trend</h2>
-          </CardHeader>
-          <CardContent className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sales}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70">
-          <CardHeader>
-            <h2 className="font-display text-2xl font-bold">Operational priority</h2>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-lg border border-border bg-background p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-medium text-foreground">Pending orders</span>
-                <Badge variant="secondary">{pendingOrders.length}</Badge>
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <Card className="border-border/70">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <BellRing className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-2xl font-bold">Business workflow alerts</h2>
               </div>
-              <p className="mt-1">
-                Review and approve business transactions and customer orders promptly.
-              </p>
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-medium text-foreground">Low-stock items</span>
-                <Badge variant="secondary">{lowStockProducts.length}</Badge>
-              </div>
-              <p className="mt-1">
-                Replenish stock and maintain product availability across the sales catalogue.
-              </p>
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-medium text-foreground">Approvals</span>
-                <Badge variant="secondary">Live</Badge>
-              </div>
-              <p className="mt-1">
-                Monitor account, payment, student, and delivery approvals in one place.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/70">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <BellRing className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-2xl font-bold">Business workflow alerts</h2>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {pendingOrders.length === 0 ? (
-              <p className="text-muted-foreground">No pending orders. Sales activity is stable.</p>
-            ) : (
-              pendingOrders.map((order) => (
-                <div key={order.id} className="rounded-lg border border-border bg-background p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium text-foreground">{order.customer_name}</p>
-                    <Badge variant="secondary">{order.status}</Badge>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Payment: {order.payment_status} • Le {Number(order.total).toLocaleString()}
-                  </p>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Warehouse className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-2xl font-bold">Stock watchlist</h2>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {lowStockProducts.length === 0 ? (
-              <p className="text-muted-foreground">
-                All products are above their configured thresholds.
-              </p>
-            ) : (
-              lowStockProducts.slice(0, 6).map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{product.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Threshold: {product.low_stock_threshold ?? 0}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">{product.stock_quantity ?? 0} left</Badge>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="mt-10 border-border/70">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
-            <h2 className="font-display text-2xl font-bold">Access control and user governance</h2>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {users.map((user) => {
-            const currentRoles = Array.isArray(user.user_roles)
-              ? (user.user_roles as Array<{ role: string }>).map((item) => item.role).join(", ")
-              : "none";
-
-            return (
-              <div key={user.id} className="rounded-lg border border-border bg-background p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {user.full_name ?? user.email ?? "Unnamed user"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                  <Badge
-                    variant={user.account_status === "deactivated" ? "destructive" : "secondary"}
-                  >
-                    {user.account_status ?? "active"}
-                  </Badge>
-                </div>
-
-                <p className="mt-3 text-xs text-muted-foreground">Current roles: {currentRoles}</p>
-                <p className="text-xs text-muted-foreground">
-                  Approval: {user.approval_status ?? "pending"}
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              {pendingOrders.length === 0 ? (
+                <p className="text-muted-foreground">
+                  No pending orders. Sales activity is stable.
                 </p>
+              ) : (
+                pendingOrders.map((order) => (
+                  <div key={order.id} className="rounded-lg border border-border bg-background p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-foreground">{order.customer_name}</p>
+                      <Badge variant="secondary">{order.status}</Badge>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Payment: {order.payment_status} • Le {Number(order.total).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="mt-3 grid gap-2">
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedRoleByUser[user.id] ?? ""}
-                      onChange={(event) =>
-                        setSelectedRoleByUser((current) => ({
-                          ...current,
-                          [user.id]: event.target.value,
-                        }))
-                      }
-                      className="h-9 flex-1 rounded-md border border-input bg-background px-2 text-xs"
+          <Card className="border-border/70">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Warehouse className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-2xl font-bold">Stock watchlist</h2>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              {lowStockProducts.length === 0 ? (
+                <p className="text-muted-foreground">
+                  All products are above their configured thresholds.
+                </p>
+              ) : (
+                lowStockProducts.slice(0, 6).map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Threshold: {product.low_stock_threshold ?? 0}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">{product.stock_quantity ?? 0} left</Badge>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="mt-10 border-border/70">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <h2 className="font-display text-2xl font-bold">
+                Access control and user governance
+              </h2>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {users.map((user) => {
+              const currentRoles = Array.isArray(user.user_roles)
+                ? (user.user_roles as Array<{ role: string }>).map((item) => item.role).join(", ")
+                : "none";
+
+              return (
+                <div key={user.id} className="rounded-lg border border-border bg-background p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {user.full_name ?? user.email ?? "Unnamed user"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <Badge
+                      variant={user.account_status === "deactivated" ? "destructive" : "secondary"}
                     >
-                      <option value="">Grant role</option>
-                      <option value="customer">Customer</option>
-                      <option value="student">Student</option>
-                      <option value="teacher">Teacher</option>
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super Admin</option>
-                    </select>
-                    <Button
-                      size="sm"
-                      onClick={() => void updateUserRole(user.id)}
-                      disabled={!selectedRoleByUser[user.id]}
-                    >
-                      Apply
-                    </Button>
+                      {user.account_status ?? "active"}
+                    </Badge>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => void resetPassword(user.id)}
-                    >
-                      <KeyRound className="mr-1 h-4 w-4" />
-                      Reset
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={user.account_status === "deactivated" ? "default" : "destructive"}
-                      className="flex-1"
-                      onClick={() =>
-                        void setAccountState(
-                          user.id,
-                          user.account_status === "deactivated" ? "active" : "deactivated",
-                        )
-                      }
-                    >
-                      {user.account_status === "deactivated" ? "Reactivate" : "Deactivate"}
-                    </Button>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Current roles: {currentRoles}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Approval: {user.approval_status ?? "pending"}
+                  </p>
+
+                  <div className="mt-3 grid gap-2">
+                    <div className="flex gap-2">
+                      <select
+                        value={selectedRoleByUser[user.id] ?? ""}
+                        onChange={(event) =>
+                          setSelectedRoleByUser((current) => ({
+                            ...current,
+                            [user.id]: event.target.value,
+                          }))
+                        }
+                        className="h-9 flex-1 rounded-md border border-input bg-background px-2 text-xs"
+                      >
+                        <option value="">Grant role</option>
+                        <option value="customer">Customer</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                      </select>
+                      <Button
+                        size="sm"
+                        onClick={() => void updateUserRole(user.id)}
+                        disabled={!selectedRoleByUser[user.id]}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => void resetPassword(user.id)}
+                      >
+                        <KeyRound className="mr-1 h-4 w-4" />
+                        Reset
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={user.account_status === "deactivated" ? "default" : "destructive"}
+                        className="flex-1"
+                        onClick={() =>
+                          void setAccountState(
+                            user.id,
+                            user.account_status === "deactivated" ? "active" : "deactivated",
+                          )
+                        }
+                      >
+                        {user.account_status === "deactivated" ? "Reactivate" : "Deactivate"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <Card className="border-border/70">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-2xl font-bold">Delivery and fulfilment</h2>
               </div>
-            );
-          })}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-border bg-background p-3">
+                Customer-provided delivery details remain visible to the admin for review and
+                fulfilment updates.
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                Delivery status is configured centrally and can be advanced from processing to
+                delivery without exposing restricted admin actions to ordinary users.
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                Delivery history and status changes are retained for audit and customer service
+                follow-up.
+              </div>
+            </CardContent>
+          </Card>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/70">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-2xl font-bold">Delivery and fulfilment</h2>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-lg border border-border bg-background p-3">
-              Customer-provided delivery details remain visible to the admin for review and
-              fulfilment updates.
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              Delivery status is configured centrally and can be advanced from processing to
-              delivery without exposing restricted admin actions to ordinary users.
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              Delivery history and status changes are retained for audit and customer service
-              follow-up.
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-2xl font-bold">Role-security rules</h2>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-lg border border-border bg-background p-3">
-              Newly registered accounts stay restricted until admin approval passes, then the
-              correct dashboard permissions are granted.
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              Deactivated accounts cannot log in or access protected functions because the account
-              state is enforced in the auth and route guards.
-            </div>
-            <div className="rounded-lg border border-border bg-background p-3">
-              Super Admin authority is separated from ordinary admin privileges so high-level role
-              changes and sensitive analytics remain restricted to the super-admin role.
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="border-border/70">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-2xl font-bold">Role-security rules</h2>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-border bg-background p-3">
+                Newly registered accounts stay restricted until admin approval passes, then the
+                correct dashboard permissions are granted.
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                Deactivated accounts cannot log in or access protected functions because the account
+                state is enforced in the auth and route guards.
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                Super Admin authority is separated from ordinary admin privileges so high-level role
+                changes and sensitive analytics remain restricted to the super-admin role.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </DashboardShell>
   );
 }

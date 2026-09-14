@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, LogIn, UserPlus } from "lucide-react";
+import { ArrowRight, LoaderCircle, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { user, role, signOut } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,17 +44,16 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
-  const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || authLoading) return;
     const targetRole =
       role ??
       normalizeRole(user.user_metadata?.role) ??
       normalizeRole(user.app_metadata?.role) ??
       "student";
     void navigate({ to: getDashboardPath(targetRole), replace: true });
-  }, [navigate, user, role]);
+  }, [navigate, user, role, authLoading]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -94,6 +94,7 @@ function AuthPage() {
         if (error) throw error;
 
         if (data.session) {
+          toast.success("Login successful.");
           const roleRows = await supabase
             .from("user_roles")
             .select("role")
@@ -113,7 +114,6 @@ function AuthPage() {
             window.localStorage.setItem("klunsar-approval-status", effectiveApprovalStatus);
           }
 
-          setMessage("Signed in successfully. Redirecting...");
           void navigate({ to: getDashboardPath(rawRole), replace: true });
           return;
         }
@@ -146,7 +146,7 @@ function AuthPage() {
           window.localStorage.setItem("klunsar-user-role", nextRole);
           window.localStorage.setItem("klunsar-approval-status", "pending");
         }
-        setMessage("Account created successfully. Redirecting...");
+        toast.success("Account created successfully.");
         void navigate({ to: getDashboardPath(nextRole), replace: true });
         return;
       }
@@ -168,55 +168,11 @@ function AuthPage() {
 
   if (user) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-14">
-        <Card className="border-border/70">
-          <CardHeader>
-            <h1 className="text-3xl font-bold">Redirecting to your dashboard...</h1>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>You are signed in and will be taken to the correct dashboard automatically.</p>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() =>
-                  void navigate({
-                    to: getDashboardPath(
-                      role ??
-                        normalizeRole(user.user_metadata?.role) ??
-                        normalizeRole(user.app_metadata?.role) ??
-                        "student",
-                    ),
-                    replace: true,
-                  })
-                }
-              >
-                Go to dashboard now
-              </Button>
-              <Button variant="outline" onClick={() => setConfirmSignOut(true)}>
-                Sign out
-              </Button>
-            </div>
-            {confirmSignOut && (
-              <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                <p className="font-medium text-foreground">Are you sure you want to sign out?</p>
-                <div className="mt-3 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setConfirmSignOut(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => {
-                      setConfirmSignOut(false);
-                      void signOut();
-                    }}
-                  >
-                    Yes, sign out
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      <div className="flex min-h-[50vh] items-center justify-center" aria-busy="true">
+        <LoaderCircle
+          className="h-6 w-6 animate-spin text-primary"
+          aria-label="Loading dashboard"
+        />
       </div>
     );
   }
@@ -322,12 +278,14 @@ function AuthPage() {
               )}
 
               <Button type="submit" disabled={loading} className="w-full gap-2">
-                {loading
-                  ? "Please wait..."
-                  : mode === "login"
-                    ? "Sign in to my account"
-                    : "Create my account"}
-                <ArrowRight className="h-4 w-4" />
+                {loading ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" aria-label="Signing in" />
+                ) : (
+                  <>
+                    {mode === "login" ? "Sign in to my account" : "Create my account"}
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>

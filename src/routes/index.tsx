@@ -76,12 +76,12 @@ function Home() {
               {site?.["motto"] ?? "Build Your Skills"}
             </Badge>
             <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-              Computer training in Lunsar that ends with a skill, an exam and a certificate
+              {site?.hero_title ??
+                "Computer training in Lunsar that ends with a skill, an exam and a certificate"}
             </h1>
             <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Six examined programs, four daily shifts and qualified tutors who stay with you until
-              the skill is real. Choose the Regular path during school terms, or the Bonanza holiday
-              intensive at half the fee.
+              {site?.hero_description ??
+                "Six examined programs, four daily shifts and qualified tutors who stay with you until the skill is real. Choose the Regular path during school terms, or the Bonanza holiday intensive at half the fee."}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/shop">
@@ -108,7 +108,7 @@ function Home() {
           </div>
           <div className="relative">
             <img
-              src={heroImage}
+              src={site?.hero_image_data || heroImage}
               alt="Students learning at computers with a tutor at K-Lunsar Computer Training"
               width={1600}
               height={1008}

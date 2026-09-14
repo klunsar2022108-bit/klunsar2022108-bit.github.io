@@ -14,6 +14,7 @@ export type Database = {
           created_at: string;
           graduation_date: string | null;
           id: string;
+          idempotency_key: string | null;
           status: string;
           title: string;
           user_id: string;
@@ -23,6 +24,7 @@ export type Database = {
           created_at?: string;
           graduation_date?: string | null;
           id?: string;
+          idempotency_key?: string | null;
           status?: string;
           title?: string;
           user_id: string;
@@ -32,6 +34,7 @@ export type Database = {
           created_at?: string;
           graduation_date?: string | null;
           id?: string;
+          idempotency_key?: string | null;
           status?: string;
           title?: string;
           user_id?: string;
@@ -526,25 +529,31 @@ export type Database = {
       };
       profiles: {
         Row: {
+          address: string | null;
           created_at: string;
           full_name: string | null;
           id: string;
+          parent_phone: string | null;
           phone: string | null;
           updated_at: string;
           username: string | null;
         };
         Insert: {
+          address?: string | null;
           created_at?: string;
           full_name?: string | null;
           id: string;
+          parent_phone?: string | null;
           phone?: string | null;
           updated_at?: string;
           username?: string | null;
         };
         Update: {
+          address?: string | null;
           created_at?: string;
           full_name?: string | null;
           id?: string;
+          parent_phone?: string | null;
           phone?: string | null;
           updated_at?: string;
           username?: string | null;
